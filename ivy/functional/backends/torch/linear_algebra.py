@@ -496,7 +496,7 @@ def diag(
     return torch.diag(x, diagonal=k)
 
 
-@with_unsupported_dtypes({"1.11.0 and below": ("float16", "bfloat16")}, backend_version)
+@with_unsupported_dtypes({"2.0.1 and below": ("float16", "bfloat16")}, backend_version)
 def vander(
     x: torch.tensor,
     /,
@@ -510,11 +510,14 @@ def vander(
     start, stop, step = N - 1, -1, -1
     if increasing:
         start, stop, step = 0, N, 1
-    return torch.pow(
+    ret = torch.pow(
         torch.transpose(torch.unsqueeze(x, 0), 0, 1),
         torch.arange(start, stop, step),
         out=out,
     )
+    if ret.dtype != x.dtype:
+        return ret.to(x.dtype)
+    return ret
 
 
 @with_unsupported_dtypes({"1.11.0 and below": ("complex",)}, backend_version)
